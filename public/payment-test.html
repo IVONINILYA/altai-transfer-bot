@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Тест платежей — Алтай Трансфер</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f5f6f8;
+      color: #222;
+      line-height: 1.5;
+      padding: 16px;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    .header {
+      text-align: center;
+      padding: 20px 0;
+      border-bottom: 1px solid #e0e0e0;
+      margin-bottom: 20px;
+    }
+    .header h1 { font-size: 20px; font-weight: 600; color: #1a1a1a; }
+    .header p { font-size: 13px; color: #888; margin-top: 4px; }
+    .badge {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      margin-top: 8px;
+    }
+    .badge.mock { background: #fff3cd; color: #856404; }
+    .badge.test { background: #d1ecf1; color: #0c5460; }
+    .badge.live { background: #f8d7da; color: #721c24; }
+
+    .section { margin-bottom: 20px; }
+    .section-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: #555;
+      margin-bottom: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* Test Cards */
+    .card-grid { display: grid; gap: 10px; }
+    .test-card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 14px;
+      border-left: 4px solid #28a745;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    }
+    .test-card.fail { border-left-color: #dc3545; }
+    .test-card.info { border-left-color: #17a2b8; }
+    .test-card.warn { border-left-color: #fd7e14; }
+    .test-card-name {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .test-card-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      display: inline-block;
+    }
+    .test-card-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+      padding: 3px 0;
+    }
+    .test-card-label { color: #888; }
+    .test-card-value {
+      font-family: 'SF Mono', Monaco, monospace;
+      font-weight: 500;
+      color: #333;
+    }
+    .test-card-result {
+      margin-top: 8px;
+      padding-top: 8px;
+      border-top: 1px dashed #e0e0e0;
+      font-size: 12px;
+      color: #666;
+    }
+    .copy-btn {
+      background: #f0f0f0;
+      border: none;
+      border-radius: 4px;
+      padding: 2px 8px;
+      font-size: 11px;
+      cursor: pointer;
+      color: #555;
+      margin-left: 6px;
+    }
+    .copy-btn:hover { background: #e0e0e0; }
+    .copy-btn.copied { background: #d4edda; color: #155724; }
+
+    /* Payment Form */
+    .form-box {
+      background: #fff;
+      border-radius: 12px;
+      padding: 16px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    }
+    .form-group { margin-bottom: 14px; }
+    .form-group label {
+      display: block;
+      font-size: 13px;
+      font-weight: 500;
+      color: #555;
+      margin-bottom: 5px;
+    }
+    .form-group input, .form-group textarea {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: 15px;
+      font-family: inherit;
+      -webkit-appearance: none;
+    }
+    .form-group input:focus, .form-group textarea:focus {
+      outline: none;
+      border-color: #2481cc;
+    }
+    .form-row { display: flex; gap: 10px; }
+    .form-row .form-group { flex: 1; }
+
+    .btn {
+      width: 100%;
+      padding: 13px;
+      border: none;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.2s;
+      -webkit-appearance: none;
+    }
+    .btn:disabled { opacity: 0.6; cursor: not-allowed; }
+    .btn-primary {
+      background: linear-gradient(135deg, #2481cc, #1a6db5);
+      color: #fff;
+    }
+    .btn-success {
+      background: linear-gradient(135deg, #28a745, #1e7e34);
+      color: #fff;
+    }
+    .btn-outline {
+      background: #fff;
+      border: 1px solid #ddd;
+      color: #555;
+    }
+
+    /* Result */
+    .result-box {
+      background: #fff;
+      border-radius: 12px;
+      padding: 16px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+      display: none;
+    }
+    .result-box.visible { display: block; }
+    .result-title {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .result-status {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .status-pending { background: #fff3cd; color: #856404; }
+    .status-succeeded { background: #d4edda; color: #155724; }
+    .status-canceled { background: #f8d7da; color: #721c24; }
+    .result-detail {
+      font-size: 13px;
+      color: #555;
+      margin: 4px 0;
+    }
+    .result-url {
+      background: #f5f6f8;
+      border-radius: 6px;
+      padding: 10px;
+      font-size: 12px;
+      word-break: break-all;
+      color: #2481cc;
+      margin-top: 8px;
+      cursor: pointer;
+    }
+    .result-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 12px;
+    }
+    .result-actions .btn { flex: 1; }
+
+    /* Polling */
+    .polling-indicator {
+      display: none;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 10px;
+      font-size: 13px;
+      color: #888;
+    }
+    .polling-indicator.active { display: flex; }
+    .spinner {
+      width: 16px; height: 16px;
+      border: 2px solid #ddd;
+      border-top-color: #2481cc;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Error */
+    .error-box {
+      background: #f8d7da;
+      color: #721c24;
+      border-radius: 8px;
+      padding: 12px;
+      font-size: 13px;
+      margin-bottom: 14px;
+      display: none;
+    }
+    .error-box.visible { display: block; }
+
+    /* Info box */
+    .info-box {
+      background: #d1ecf1;
+      color: #0c5460;
+      border-radius: 8px;
+      padding: 12px;
+      font-size: 12px;
+      margin-bottom: 14px;
+      line-height: 1.6;
+    }
+
+    .back-link {
+      display: block;
+      text-align: center;
+      margin-top: 20px;
+      font-size: 14px;
+      color: #2481cc;
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <h1>Тестирование платежей</h1>
+    <p>ЮKassa — Алтай Трансфер</p>
+    <span id="mode-badge" class="badge mock">Загрузка...</span>
+  </div>
+
+  <div id="error-box" class="error-box"></div>
+
+  <!-- Test Cards -->
+  <div class="section">
+    <div class="section-title">Тестовые карты</div>
+    <div class="info-box">
+      При оплате на странице ЮKassa введите данные одной из карт ниже.
+      Никакие реальные средства не списываются.
+    </div>
+    <div id="cards-container" class="card-grid"></div>
+  </div>
+
+  <!-- Payment Form -->
+  <div class="section">
+    <div class="section-title">Создать тестовый платёж</div>
+    <div class="form-box">
+      <div class="form-row">
+        <div class="form-group">
+          <label for="amount">Сумма (₽)</label>
+          <input type="number" id="amount" value="1500" min="1" max="999999" placeholder="1500">
+        </div>
+        <div class="form-group">
+          <label for="order-id">Номер заказа</label>
+          <input type="text" id="order-id" value="test-" placeholder="test-123">
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="description">Описание</label>
+        <input type="text" id="description" value="Тестовый перевод — Аэропорт → Чемал" placeholder="Описание платежа">
+      </div>
+      <button id="btn-create" class="btn btn-primary">Создать тестовый платёж</button>
+    </div>
+  </div>
+
+  <!-- Polling Indicator -->
+  <div id="polling" class="polling-indicator">
+    <div class="spinner"></div>
+    <span>Проверка статуса платежа...</span>
+  </div>
+
+  <!-- Result -->
+  <div id="result-box" class="result-box">
+    <div class="result-title">
+      Результат платежа
+      <span id="result-status" class="result-status status-pending">Ожидание</span>
+    </div>
+    <div class="result-detail">ID: <strong id="result-id">—</strong></div>
+    <div class="result-detail">Сумма: <strong id="result-amount">—</strong></div>
+    <div id="result-url" class="result-url"></div>
+    <div class="result-actions">
+      <button id="btn-open" class="btn btn-success">Перейти к оплате</button>
+      <button id="btn-mock-success" class="btn btn-outline" style="display:none;">Simulate: Успех</button>
+      <button id="btn-mock-fail" class="btn btn-outline" style="display:none;color:#dc3545;border-color:#dc3545;">Simulate: Отказ</button>
+    </div>
+  </div>
+
+  <a href="/" class="back-link">← Вернуться в Mini App</a>
+
+  <script>
+    // ── State ──────────────────────────────────────────────────────────────────
+    var currentPaymentId = null;
+    var currentMockToken = null;
+    var isMockMode = false;
+    var pollInterval = null;
+
+    // ── Init ───────────────────────────────────────────────────────────────────
+    document.addEventListener('DOMContentLoaded', function() {
+      loadTestCards();
+      loadModeInfo();
+
+      document.getElementById('btn-create').addEventListener('click', createTestPayment);
+      document.getElementById('btn-open').addEventListener('click', openPaymentUrl);
+      document.getElementById('btn-mock-success').addEventListener('click', function(){ simulateMock(true); });
+      document.getElementById('btn-mock-fail').addEventListener('click', function(){ simulateMock(false); });
+
+      // Check URL params for mock redirect
+      checkMockRedirect();
+    });
+
+    // ── Load Mode Info ─────────────────────────────────────────────────────────
+    function loadModeInfo() {
+      fetch('/api/health')
+        .then(function(r){ return r.json(); })
+        .then(function(data) {
+          var badge = document.getElementById('mode-badge');
+          if (data.payment) {
+            var mode = data.payment.mode;
+            badge.textContent = mode === 'mock' ? 'Mock Mode' : mode === 'test' ? 'Test Mode' : 'Live Mode';
+            badge.className = 'badge ' + mode;
+            isMockMode = mode === 'mock';
+          }
+        })
+        .catch(function(){});
+    }
+
+    // ── Load Test Cards ────────────────────────────────────────────────────────
+    function loadTestCards() {
+      fetch('/api/payments/test-cards')
+        .then(function(r){ return r.json(); })
+        .then(function(data) {
+          renderCards(data.cards || []);
+        })
+        .catch(function() {
+          // Fallback: hardcoded cards
+          renderCards([
+            { name:'Успешный платёж', number:'5555 5555 5555 4477', expiry:'12/30', cvv:'123', code3ds:'12345678', result:'Платёж успешно выполнен', color:'#28a745' },
+            { name:'Отказ в платеже', number:'5555 5555 5555 4444', expiry:'Любая дата в будущем', cvv:'123', code3ds:null, result:'Платёж отклонён банком', color:'#dc3545' },
+          ]);
+        });
+    }
+
+    function renderCards(cards) {
+      var container = document.getElementById('cards-container');
+      var html = '';
+      cards.forEach(function(card) {
+        var cls = card.name.indexOf('Отказ') !== -1 || card.name.indexOf('недостаточно') !== -1 ? 'test-card fail' :
+                  card.name.indexOf('3DS') !== -1 ? 'test-card info' :
+                  card.name.indexOf('Отказ') !== -1 ? 'test-card warn' : 'test-card';
+        html += '<div class="' + cls + '">' +
+          '<div class="test-card-name">' +
+            '<span class="test-card-dot" style="background:' + esc(card.color) + '"></span>' +
+            esc(card.name) +
+          '</div>' +
+          '<div class="test-card-row">' +
+            '<span class="test-card-label">Номер</span>' +
+            '<span class="test-card-value">' + esc(card.number) +
+              '<button class="copy-btn" data-copy="' + esc(card.number.replace(/\s/g,'')) + '">Копировать</button>' +
+            '</span>' +
+          '</div>' +
+          '<div class="test-card-row">' +
+            '<span class="test-card-label">Срок</span>' +
+            '<span class="test-card-value">' + esc(card.expiry) + '</span>' +
+          '</div>' +
+          '<div class="test-card-row">' +
+            '<span class="test-card-label">CVV</span>' +
+            '<span class="test-card-value">' + esc(card.cvv) +
+              '<button class="copy-btn" data-copy="' + esc(card.cvv) + '">Копировать</button>' +
+            '</span>' +
+          '</div>' +
+          (card.code3ds ? '<div class="test-card-row">' +
+            '<span class="test-card-label">Код 3DS</span>' +
+            '<span class="test-card-value">' + esc(card.code3ds) +
+              '<button class="copy-btn" data-copy="' + esc(card.code3ds) + '">Копировать</button>' +
+            '</span>' +
+          '</div>' : '') +
+          '<div class="test-card-result">' + esc(card.result) + '</div>' +
+        '</div>';
+      });
+      container.innerHTML = html;
+
+      // Bind copy buttons
+      container.querySelectorAll('.copy-btn').forEach(function(btn){
+        btn.addEventListener('click', function(){
+          var text = this.getAttribute('data-copy');
+          copyToClipboard(text, this);
+        });
+      });
+    }
+
+    // ── Create Payment ─────────────────────────────────────────────────────────
+    function createTestPayment() {
+      hideError();
+      var amount = parseFloat(document.getElementById('amount').value);
+      var orderId = document.getElementById('order-id').value.trim();
+      var description = document.getElementById('description').value.trim();
+
+      if (!amount || amount <= 0) { showError('Введите корректную сумму'); return; }
+      if (!orderId) { showError('Введите номер заказа'); return; }
+
+      var btn = document.getElementById('btn-create');
+      btn.disabled = true;
+      btn.textContent = 'Создание...';
+
+      var body = {
+        order_id: orderId,
+        amount: amount,
+        description: description,
+        return_url: window.location.href.split('?')[0] + '?payment_check=' + Date.now()
+      };
+
+      fetch('/api/payments/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      })
+      .then(function(r){
+        if (!r.ok) return r.json().then(function(d){ throw new Error(d.error || 'Ошибка ' + r.status); });
+        return r.json();
+      })
+      .then(function(data){
+        currentPaymentId = data.payment_id;
+        showResult(data);
+        btn.disabled = false;
+        btn.textContent = 'Создать тестовый платёж';
+
+        // Start polling for status
+        startPolling(data.payment_id);
+      })
+      .catch(function(err){
+        showError(err.message || 'Не удалось создать платёж');
+        btn.disabled = false;
+        btn.textContent = 'Создать тестовый платёж';
+      });
+    }
+
+    // ── Show Result ────────────────────────────────────────────────────────────
+    function showResult(data) {
+      var box = document.getElementById('result-box');
+      box.classList.add('visible');
+
+      document.getElementById('result-id').textContent = data.payment_id;
+      document.getElementById('result-amount').textContent = (data.amount ? data.amount.value : '—') + ' ₽';
+
+      var statusEl = document.getElementById('result-status');
+      statusEl.textContent = data.status === 'pending' ? 'Ожидание' : data.status === 'succeeded' ? 'Успешно' : data.status === 'canceled' ? 'Отменён' : data.status;
+      statusEl.className = 'result-status status-' + (data.status || 'pending');
+
+      var urlEl = document.getElementById('result-url');
+      if (data.payment_url) {
+        urlEl.textContent = data.payment_url;
+        urlEl.style.display = 'block';
+        document.getElementById('btn-open').style.display = 'block';
+      } else {
+        urlEl.style.display = 'none';
+        document.getElementById('btn-open').style.display = 'none';
+      }
+
+      // Show mock simulation buttons in mock mode
+      var mockSuccess = document.getElementById('btn-mock-success');
+      var mockFail = document.getElementById('btn-mock-fail');
+      if (isMockMode) {
+        mockSuccess.style.display = 'block';
+        mockFail.style.display = 'block';
+        document.getElementById('btn-open').style.display = 'none';
+      } else {
+        mockSuccess.style.display = 'none';
+        mockFail.style.display = 'none';
+      }
+    }
+
+    // ── Open Payment URL ───────────────────────────────────────────────────────
+    function openPaymentUrl() {
+      var url = document.getElementById('result-url').textContent;
+      if (url) window.open(url, '_blank');
+    }
+
+    // ── Polling ────────────────────────────────────────────────────────────────
+    function startPolling(paymentId) {
+      stopPolling();
+      var indicator = document.getElementById('polling');
+      indicator.classList.add('active');
+
+      pollInterval = setInterval(function(){
+        checkStatus(paymentId);
+      }, 3000);
+
+      // Initial check
+      checkStatus(paymentId);
+    }
+
+    function stopPolling() {
+      if (pollInterval) {
+        clearInterval(pollInterval);
+        pollInterval = null;
+      }
+      document.getElementById('polling').classList.remove('active');
+    }
+
+    function checkStatus(paymentId) {
+      fetch('/api/payments/' + encodeURIComponent(paymentId) + '/status')
+        .then(function(r){ return r.json(); })
+        .then(function(data){
+          var statusEl = document.getElementById('result-status');
+          statusEl.textContent = data.status === 'pending' ? 'Ожидание' : data.status === 'succeeded' ? 'Успешно' : data.status === 'canceled' ? 'Отменён' : data.status;
+          statusEl.className = 'result-status status-' + (data.status || 'pending');
+
+          if (data.status === 'succeeded' || data.status === 'canceled') {
+            stopPolling();
+          }
+        })
+        .catch(function(){});
+    }
+
+    // ── Mock Simulation ────────────────────────────────────────────────────────
+    function simulateMock(success) {
+      if (!currentPaymentId) return;
+
+      fetch('/api/payments/simulate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          payment_id: currentPaymentId,
+          success: success
+        })
+      })
+      .then(function(r){ return r.json(); })
+      .then(function(data){
+        var statusEl = document.getElementById('result-status');
+        statusEl.textContent = data.status === 'succeeded' ? 'Успешно' : data.status === 'canceled' ? 'Отменён' : data.status;
+        statusEl.className = 'result-status status-' + (data.status || 'pending');
+        checkStatus(currentPaymentId);
+      })
+      .catch(function(){});
+    }
+
+    function checkMockRedirect() {
+      var params = new URLSearchParams(window.location.search);
+      var mockPayment = params.get('mock_payment');
+      if (mockPayment) {
+        // Auto-check status after mock redirect
+        currentPaymentId = mockPayment;
+        showResult({ payment_id: mockPayment, status: 'pending', amount: { value: '—' }, test: true });
+        startPolling(mockPayment);
+      }
+    }
+
+    // ── Utilities ──────────────────────────────────────────────────────────────
+    function showError(msg) {
+      var el = document.getElementById('error-box');
+      el.textContent = msg;
+      el.classList.add('visible');
+      setTimeout(function(){ el.classList.remove('visible'); }, 6000);
+    }
+
+    function hideError() {
+      document.getElementById('error-box').classList.remove('visible');
+    }
+
+    function copyToClipboard(text, btn) {
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(text).then(function(){
+          btn.textContent = 'Скопировано!';
+          btn.classList.add('copied');
+          setTimeout(function(){ btn.textContent = 'Копировать'; btn.classList.remove('copied'); }, 1500);
+        });
+      } else {
+        var ta = document.createElement('textarea');
+        ta.value = text;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+        btn.textContent = 'Скопировано!';
+        setTimeout(function(){ btn.textContent = 'Копировать'; }, 1500);
+      }
+    }
+
+    function esc(t) {
+      if (!t) return '';
+      var d = document.createElement('div');
+      d.textContent = String(t);
+      return d.innerHTML;
+    }
+  </script>
+
+</body>
+</html>

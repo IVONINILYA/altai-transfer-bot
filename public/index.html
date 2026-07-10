@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Алтай Трансфер</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <div id="error-fallback" style="display:none;">
+    <h2>⚠️ Ошибка</h2>
+    <p id="error-message">Попробуйте позже</p>
+  </div>
+
+  <div id="app">
+    <div id="screens-container">
+
+      <!-- Экран 0: Главное меню пассажира -->
+      <div class="screen" id="screen-menu" data-index="0">
+        <div class="hero hero-menu">
+          <div class="hero-title">Алтай Трансфер</div>
+          <div class="hero-subtitle">Надёжные поездки по Горному Алтаю</div>
+        </div>
+        <div class="menu-grid">
+          <button class="menu-card" id="menu-book">
+            <div class="menu-icon">🚗</div>
+            <div class="menu-label">Забронировать трансфер</div>
+            <div class="menu-desc">Выберите маршрут и водителя</div>
+          </button>
+          <button class="menu-card" id="menu-orders">
+            <div class="menu-icon">📋</div>
+            <div class="menu-label">Мои заявки</div>
+            <div class="menu-desc">Статус ваших заказов</div>
+          </button>
+          <button class="menu-card" id="menu-become-driver">
+            <div class="menu-icon">🚗</div>
+            <div class="menu-label">Стать водителем</div>
+            <div class="menu-desc">Зарабатывайте на трансферах</div>
+          </button>
+          <button class="menu-card" id="menu-driver">
+            <div class="menu-icon">👨‍✈️</div>
+            <div class="menu-label">Кабинет водителя</div>
+            <div class="menu-desc">Вход для водителей</div>
+          </button>
+        </div>
+      </div>
+
+      <!-- Экран 1: Маршруты -->
+      <div class="screen" id="screen-routes" data-index="1">
+        <div class="header sticky">
+          <button class="header-back" id="btn-back-menu1">←</button>
+          <span>Выберите маршрут</span>
+        </div>
+        <div id="routes-list" class="list-container"></div>
+      <button class="btn-secondary" id="btn-custom-route" style="margin-top: 16px;">🗺️ Свой маршрут</button>
+      <div id="custom-route-form" style="display:none; margin: 12px 16px; padding: 16px; background: #f8f9fa; border-radius: 14px;">
+        <div class="form-group">
+          <label>Откуда</label>
+          <input type="text" id="custom-from" list="locations-list" placeholder="Например: Кош-Агач">
+        </div>
+        <div class="form-group">
+          <label>Куда</label>
+          <input type="text" id="custom-to" list="locations-list" placeholder="Например: Онгудай">
+        </div>
+        <datalist id="locations-list">
+          <option value="Аэропорт Горно-Алтайск">
+          <option value="Горно-Алтайск">
+          <option value="Манжерок">
+          <option value="Чемал">
+          <option value="Онгудай">
+          <option value="Усть-Кан">
+          <option value="Усть-Кокса">
+          <option value="Акташ">
+          <option value="Кош-Агач">
+          <option value="Улаган">
+          <option value="Джазатор (Беляши)">
+          <option value="Телецкое озеро">
+          <option value="Курай">
+          <option value="Шебалино">
+          <option value="Усть-Сема">
+        </datalist>
+        <div id="custom-price-result" style="text-align:center; margin: 12px 0; font-size: 18px; font-weight: 700; color: var(--tg-button); display: none;"></div>
+        <button class="btn-primary" id="btn-calc-custom" style="margin: 8px 0; width: 100%;">Рассчитать цену</button>
+        <button class="btn-primary" id="btn-book-custom" style="margin: 8px 0; width: 100%; display: none;">Выбрать водителя</button>
+      </div>
+      </div>
+
+      <!-- Экран 2: Форма бронирования -->
+      <div class="screen" id="screen-form" data-index="2">
+        <div class="header sticky">
+          <button class="header-back" id="btn-back-routes">←</button>
+          <span>Бронирование</span>
+        </div>
+        <div class="order-summary" id="order-summary"></div>
+        <form id="booking-form">
+          <div class="form-group">
+            <label>Дата поездки</label>
+            <input type="date" id="booking-date" required>
+          </div>
+          <div class="form-group">
+            <label>Время</label>
+            <input type="time" id="booking-time" required>
+          </div>
+          <div class="form-group">
+            <label>Пассажиры</label>
+            <input type="number" id="booking-passengers" min="1" max="8" value="1" required>
+          </div>
+          <div class="form-group">
+            <label>Комментарий</label>
+            <textarea id="booking-comment" rows="2" placeholder="Детское кресло, багаж..."></textarea>
+          </div>
+          <button type="submit" class="btn-primary" id="btn-submit">Выбрать водителя</button>
+        </form>
+      </div>
+
+      <!-- Экран 3: Водители -->
+      <div class="screen" id="screen-drivers" data-index="3">
+        <div class="header sticky">
+          <button class="header-back" id="btn-back-form">←</button>
+          <span id="drivers-route-name">Водители</span>
+        </div>
+        <div id="drivers-list" class="list-container"></div>
+      </div>
+
+      <!-- Экран 4: Успех -->
+      <div class="screen" id="screen-success" data-index="4">
+        <div class="success-box">
+          <div class="success-icon">✓</div>
+          <div class="success-title">Заказ создан!</div>
+          <div class="success-text" id="success-details"></div>
+          <button class="btn-primary" id="btn-success-orders">Мои заявки</button>
+          <button class="btn-secondary" id="btn-success-new">Новая поездка</button>
+        </div>
+      </div>
+
+      <!-- Экран 5: Мои заказы -->
+      <div class="screen" id="screen-orders" data-index="5">
+        <div class="header sticky">
+          <button class="header-back" id="btn-back-menu2">←</button>
+          <span>Мои заявки</span>
+        </div>
+        <div id="orders-list" class="list-container"></div>
+        <div id="orders-empty" class="empty-state" style="display:none;">
+          <div class="empty-icon">📋</div>
+          <div class="empty-text">У вас пока нет заявок</div>
+          <button class="btn-primary" id="btn-empty-book">Забронировать трансфер</button>
+        </div>
+      </div>
+
+      <!-- Экран 6: Кабинет водителя -->
+      <div class="screen" id="screen-driver" data-index="6">
+        <div class="header sticky">
+          <button class="header-back" id="btn-back-menu3">←</button>
+          <span>Кабинет водителя</span>
+        </div>
+
+        <div id="driver-auth">
+          <div class="form-group">
+            <label>Ваш ID водителя</label>
+            <input type="text" id="driver-id-input" placeholder="Например: d1">
+          </div>
+          <button class="btn-primary" id="btn-login-driver">Войти</button>
+        </div>
+
+        <div id="driver-content" style="display:none;">
+          <div class="driver-tabs">
+            <button class="tab-btn active" data-tab="incoming">📥 Входящие</button>
+            <button class="tab-btn" data-tab="active">✅ Активные</button>
+            <button class="tab-btn" data-tab="calendar">📅 Календарь</button>
+          </div>
+
+          <div class="tab-content active" id="tab-incoming">
+            <div id="incoming-list" class="list-container"></div>
+            <div id="incoming-empty" class="empty-state" style="display:none;">
+              <div class="empty-icon">📭</div>
+              <div class="empty-text">Нет новых заказов</div>
+            </div>
+          </div>
+
+          <div class="tab-content" id="tab-active">
+            <div id="active-list" class="list-container"></div>
+            <div id="active-empty" class="empty-state" style="display:none;">
+              <div class="empty-icon">✅</div>
+              <div class="empty-text">Нет активных заказов</div>
+            </div>
+          </div>
+
+          <div class="tab-content" id="tab-calendar">
+            <div class="calendar-section">
+              <div class="calendar-header">
+                <button class="calendar-nav" id="cal-prev">←</button>
+                <span id="cal-month">Июль 2026</span>
+                <button class="calendar-nav" id="cal-next">→</button>
+              </div>
+              <div class="calendar-grid" id="cal-grid"></div>
+              <div class="calendar-legend">
+                <div class="legend-item"><span class="legend-dot busy"></span> Не на маршруте</div>
+                <div class="legend-item"><span class="legend-dot free"></span> Доступен</div>
+                <div class="legend-item"><span class="legend-dot has-orders"></span> Есть заказы</div>
+              </div>
+              <div id="cal-detail" style="display:none;">
+                <div class="form-group">
+                  <label id="cal-detail-label">Детали для выбранной даты</label>
+                  <div id="cal-detail-orders"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Экран 7: Стать водителем -->
+      <div class="screen" id="screen-become-driver" data-index="7">
+        <div class="header sticky">
+          <button class="header-back" id="btn-back-become">←</button>
+          <span>Стать водителем</span>
+        </div>
+        <div class="become-driver-intro">
+          <div class="become-icon">🚗</div>
+          <div class="become-title">Зарабатывайте на трансферах</div>
+          <div class="become-desc">
+            • Средний заработок 3 000–8 000 ₽/день<br>
+            • Гибкий график — работайте когда удобно<br>
+            • Заказы через приложение, без посредников<br>
+            • Выплаты еженедельно
+          </div>
+        </div>
+        <form id="driver-reg-form">
+          <div class="form-group">
+            <label>ФИО</label>
+            <input type="text" id="reg-name" placeholder="Иванов Иван Иванович" required>
+          </div>
+          <div class="form-group">
+            <label>Телефон</label>
+            <input type="tel" id="reg-phone" placeholder="+7 (999) 123-45-67" required>
+          </div>
+          <div class="form-group">
+            <label>Марка и модель авто</label>
+            <input type="text" id="reg-car" placeholder="Hyundai Solaris" required>
+          </div>
+          <div class="form-group">
+            <label>Год выпуска</label>
+            <input type="number" id="reg-year" min="2005" max="2026" placeholder="2022" required>
+          </div>
+          <div class="form-group">
+            <label>Цвет авто</label>
+            <input type="text" id="reg-color" placeholder="Белый" required>
+          </div>
+          <div class="form-group">
+            <label>Город / район</label>
+            <select id="reg-region" required>
+              <option value="">Выберите район</option>
+              <option value="gorno-altaysk">Горно-Алтайск</option>
+              <option value="onguday">Онгудай</option>
+              <option value="chemal">Чемал</option>
+              <option value="kosh-agach">Кош-Агач</option>
+              <option value="ust-koksa">Усть-Кокса</option>
+              <option value="ust-kan">Усть-Кан</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>О себе (опционально)</label>
+            <textarea id="reg-bio" rows="2" placeholder="Опыт вождения, языки..."></textarea>
+          </div>
+          <button type="submit" class="btn-primary" id="btn-reg-submit">Отправить заявку</button>
+          <div class="reg-note">Заявка рассматривается в течение 24 часов. После одобрения вы получите SMS с ID водителя.</div>
+        </form>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="/script.js"></script>
+</body>
+</html>

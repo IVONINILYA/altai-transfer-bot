@@ -1,0 +1,27 @@
+name: Deploy to Bothost
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Deploy to Bothost
+        run: |
+          echo "Triggering deployment to Bothost..."
+          HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+            -X POST "https://nl7.bothost.ru/deploy" \
+            -H "Authorization: Bearer ${{ secrets.BOTHOST_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            -d '{"ref": "${{ github.sha }}", "repository": "${{ github.repository }}"}')
+          echo "Response status: $HTTP_STATUS"
+          if [ "$HTTP_STATUS" != "200" ]; then
+            echo "Deployment failed with status $HTTP_STATUS"
+            exit 1
+          fi
+          echo "Deployment triggered successfully!"
