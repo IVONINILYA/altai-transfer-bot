@@ -82,6 +82,12 @@ html, body {
   position: relative;
   background: var(--tg-bg);
   padding-bottom: 20px;
+  pointer-events: none; /* Inactive screens don't block clicks */
+}
+
+/* Active screen receives all pointer events */
+.screen.active {
+  pointer-events: auto;
 }
 
 /* ── Menu Screen ── */
