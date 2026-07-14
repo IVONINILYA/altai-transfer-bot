@@ -65,6 +65,11 @@ document.addEventListener('DOMContentLoaded', function() {
     bindEvents();
     tg.BackButton.onClick(function(){ goBack(); });
     tg.BackButton.hide();
+    
+    // Set initial active screen (menu)
+    var menuScreen = document.querySelector('.screen[data-index="0"]');
+    if (menuScreen) menuScreen.classList.add('active');
+    
     console.log('[MiniApp] v7 initialized');
 
     // Check if returning from payment
@@ -112,6 +117,13 @@ function showScreen(index) {
   currentScreenIndex = index;
   var pct = (index * 100) / 8;
   document.getElementById('screens-container').style.transform = 'translateX(-' + pct + '%)';
+
+  // CRITICAL: Manage .active class for pointer-events
+  document.querySelectorAll('.screen').forEach(function(s) {
+    s.classList.remove('active');
+  });
+  var target = document.querySelector('.screen[data-index="' + index + '"]');
+  if (target) target.classList.add('active');
 
   if (index === 0) { tg.BackButton.hide(); }
   else { tg.BackButton.show(); }
