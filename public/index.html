@@ -93,18 +93,18 @@
           <span>Бронирование</span>
         </div>
         <div class="order-summary" id="order-summary"></div>
-        <form id="booking-form">
+        <form id="booking-form" novalidate>
           <div class="form-group">
             <label>Дата поездки</label>
-            <input type="date" id="booking-date" required>
+            <input type="date" id="booking-date">
           </div>
           <div class="form-group">
             <label>Время</label>
-            <input type="time" id="booking-time" required>
+            <input type="time" id="booking-time">
           </div>
           <div class="form-group">
             <label>Пассажиры</label>
-            <input type="number" id="booking-passengers" min="1" max="8" value="1" required>
+            <input type="number" id="booking-passengers" min="1" max="8" value="1">
           </div>
           <div class="form-group">
             <label>Комментарий</label>
