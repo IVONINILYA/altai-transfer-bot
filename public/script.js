@@ -295,7 +295,7 @@ function renderRoutes(routes) {
   if (!c) return;
   var html = '';
   routes.forEach(function(r){
-    var info = r.from + ' → ' + r.to + ' · ' + r.distance + ' км · ' + r.duration;
+    var info = r.from_location + ' → ' + r.to_location + ' · ' + r.distance + ' км · ' + r.duration;
     html += '<div class="route-card" data-rid="'+r.id+'">'+
       '<div class="route-name">'+esc(r.name)+'</div>'+
       '<div class="route-info">'+esc(info)+'</div>'+
