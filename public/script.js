@@ -407,8 +407,13 @@ function submitOrder() {
     .then(function(r) {
       console.log('[MiniApp] POST /api/orders response:', r.status);
       if (!r.ok) {
-        if (r.status === 401) throw new Error('Ошибка авторизации. Попробуйте закрыть Mini App и открыть заново.');
-        return r.json().then(function(d) { throw new Error(d.error || 'Ошибка '+r.status); });
+        if (r.status === 401) throw new Error('Ошибка авторизации. Закройте Mini App и откройте заново.');
+        // Try to parse error as JSON, fallback to text
+        return r.text().then(function(text) {
+          console.error('[MiniApp] Server error response:', text.substring(0, 200));
+          try { var d = JSON.parse(text); throw new Error(d.error || 'Ошибка сервера '+r.status); }
+          catch(e) { throw new Error('Ошибка сервера '+r.status+'. Попробуйте позже.'); }
+        });
       }
       return r.json();
     })
