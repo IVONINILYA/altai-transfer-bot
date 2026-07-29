@@ -1,0 +1,16 @@
+{
+  "name": "altai-transfer-bot",
+  "version": "1.0.0",
+  "description": "Telegram Mini App — трансферный маркетплейс Горного Алтая",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "setup": "node -e \"require('./database').init()\""
+  },
+  "dependencies": {
+    "better-sqlite3": "^9.4.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
